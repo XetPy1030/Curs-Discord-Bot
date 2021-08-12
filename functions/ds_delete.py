@@ -10,7 +10,7 @@ async def delete(self, message):
     except:
         try:
             num = int(re.findall(r"num=(.*?);", msg)[0])
-            self.all_db["word"].pop(num+1)
+            self.all_db["word"].pop(num-1)
             await message.channel.send("Удалено")
         except Exception as a:
             print(a)

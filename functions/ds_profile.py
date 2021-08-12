@@ -1,7 +1,10 @@
 async def profile(self, message):
     marrie = ""
     if self.all_db["accounts"][str(message.author.id)]["married"]:
-        marrie+="Женат(-а): да\nПартнер: {}\nДата женитьбы(ахах, что?): {}".format(str((await self.get_user(self.all_db["accounts"][str(message.author.id)]["married_to"])).mention))
+        a = await self.fetch_user(self.all_db["accounts"][str(message.author.id)]["married_to"])
+        print(a)
+        b = self.all_db["accounts"][str(message.author.id)]["married_date"]
+        marrie+="Женат(-а): да\nПартнер: {}\nДата женитьбы(ахах, что?): {}".format("<@!"+str(a)+">", b)
     else:
         marrie+="Женат(-а): нет\n"
         if self.all_db["accounts"][str(message.author.id)]["married_request"] != 0:
