@@ -1,4 +1,3 @@
 cell_char = "!"
 bot_word = ""
-commands = ["help", "list", "set", "profile", "enable", "delete"]
-bot_token = "ODQzODcyNzE4MTU4ODIzNDU1.YKKLtg.ZdyTM4UjMYbmy4GBpoFHFYvOGw4"
+bot_token = "ODQzODcyNzE4MTU4ODIzNDU1.YKKLtg.Rdv6jibJ8-xoY2ZVqehSaUddI4w"
