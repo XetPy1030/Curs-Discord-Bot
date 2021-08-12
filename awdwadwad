@@ -1,0 +1,137 @@
+[33mcommit 0bca9a3b6865d0bc508e1e80b424442432ef9646[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m
+Author: XetPy1030 <xetpy1030@mail.ru>
+Date:   Thu Aug 12 21:58:17 2021 +0500
+
+    Discord bot для вашего сервера
+
+[1mdiff --git a/bot.py b/bot.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..69eb1c3[m
+[1m--- /dev/null[m
+[1m+++ b/bot.py[m
+[36m@@ -0,0 +1,52 @@[m
+[32m+[m[32mimport conf, discord, pickle, check[m
+[32m+[m[32mimport functions.com as funcs[m
+[32m+[m[32mimport reply, re, command[m
+[32m+[m[32mclass DisBot(discord.Client):[m
+[32m+[m[32m    all_db = {"accounts":{}, "word": {}}[m
+[32m+[m
+[32m+[m[32m    async def on_ready(self):[m
+[32m+[m[32m        self.load()[m
+[32m+[m[32m        #print(self.all_db)[m
+[32m+[m[32m        #self.all_db["word"].append({"re": True, "command": True, "text": r"давай <@!\d{18}> поженимся", "repl": command.davay})[m
+[32m+[m[32m        print("Бот начал работу")[m
+[32m+[m
+[32m+[m[32m    async def on_message(self, message):[m
+[32m+[m[32m        #self.all_db = {"accounts":{}, "word": [{"re": False, "command": False, "text": "надеюсь", "repl": "что будет писать бот взамен"}, {"re": True, "command": False, "text": r"надеюсь <@!\d{18}> прид[её]т", "repl": r"что будет писать [{bot}] взамен. автор - [{author}]. [{0}] упоминание"}]}[m
+[32m+[m[32m        if conf.cell_char == conf.bot_word:[m
+[32m+[m[32m            raise CallChar("Знаки вызова для общения с ботом и вызовом для команды не могут быть одинаковы")[m
+[32m+[m[32m        #self.all_db["accounts"][str(message.author.id)]["game"] = ""[m
+[32m+[m[32m        #self.all_db.update({"other": {"base_map_game_green": message.content}})[m
+[32m+[m[32m        #print(message.content)[m
+[32m+[m[32m        if str(message.author)!=str(self.user):[m
+[32m+[m[32m            check.check(self, message.author)[m
+[32m+[m[32m            if str(message.content).startswith(conf.cell_char):[m
+[32m+[m[32m                msg = str(message.content)[len(list(conf.cell_char)):].split(" ")[m
+[32m+[m[32m                if msg[0] in conf.commands:[m
+[32m+[m[32m                    await funcs.com(self, message)[m
+[32m+[m[32m                else:[m
+[32m+[m[32m                    await message.channel.send("Такой команды не существует")[m
+[32m+[m[32m            elif len(conf.bot_word) == 0 or str(message.content).startswith(conf.bot_word):[m
+[32m+[m[32m                msg = str(message.content)[len(list(conf.bot_word)):].split(" ")[m
+[32m+[m[32m                if self.all_db["accounts"][str(message.author.id)]["enable_msg_reply"]:[m
+[32m+[m[32m                    for i in self.all_db["word"]:[m
+[32m+[m[32m                        i["text"] = i["text"].lower()[m
+[32m+[m[32m                        i["text"] = i["text"].replace("ё", "е")[m
+[32m+[m[32m                        if i["re"]:[m
+[32m+[m[32m                            if re.findall(i["text"], " ".join(msg)):[m
+[32m+[m[32m                                await reply.reply_re(self, message, i)[m
+[32m+[m[32m                        else:[m
+[32m+[m[32m                            if " ".join(msg).lower() == i["text"]:[m
+[32m+[m[32m                                await reply.reply(self, message, i)[m
+[32m+[m
+[32m+[m[32m        self.save()[m
+[32m+[m
+[32m+[m[32m    def save(self):[m
+[32m+[m[32m        with open('db.pickle', 'wb') as f:[m
+[32m+[m[32m            pickle.dump(self.all_db, f)[m
+[32m+[m
+[32m+[m[32m    def load(self):[m
+[32m+[m[32m        with open('db.pickle', 'rb') as f:[m
+[32m+[m[32m            self.all_db = pickle.load(f)[m
+[32m+[m
+[32m+[m[32mclient = DisBot()[m
+[32m+[m[32mclient.run(conf.bot_token)[m
+\ No newline at end of file[m
+[1mdiff --git a/check.py b/check.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..6302d8c[m
+[1m--- /dev/null[m
+[1m+++ b/check.py[m
+[36m@@ -0,0 +1,5 @@[m
+[32m+[m[32mdef check(*args):[m
+[32m+[m[32m    if str(args[1].id) in args[0].all_db["accounts"].keys():[m
+[32m+[m[32m        pass[m
+[32m+[m[32m    else:[m
+[32m+[m[32m        args[0].all_db["accounts"].update({str(args[1].id): {"married": False, "married_to": 0, "xp": 0, "married_date": "", "married_request": 0, "admin": False, "enable_msg_reply": True}})[m
+\ No newline at end of file[m
+[1mdiff --git a/command.py b/command.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..988e39d[m
+[1m--- /dev/null[m
+[1m+++ b/command.py[m
+[36m@@ -0,0 +1,29 @@[m
+[32m+[m[32mimport re, conf, datetime, check[m
+[32m+[m[32masync def davay(*args):[m
+[32m+[m[32m    self = args[0][m
+[32m+[m[32m    message = args[1][m
+[32m+[m[32m    msg = str(message.content)[len(list(conf.bot_word)):][m
+[32m+[m[32m    i = args[2][m
+[32m+[m[32m    user_1 = message.author[m
+[32m+[m[32m    id = re.findall("<@!\d{18}>", msg)[0][m
+[32m+[m[32m    id = re.findall("<@!(.*?)>", id)[0][m
+[32m+[m[32m    user_2 = await self.fetch_user(id)[m
+[32m+[m[32m    check.check(self, user_2)[m
+[32m+[m[32m    if self.all_db["accounts"][str(user_1.id)]["married"] or self.all_db["accounts"][str(user_2.id)]["married"]:[m
+[32m+[m[32m        await message.channel.send("Ктото из вас уже поженился, а может и вы оба, мне лень делать проверку на каждого поотдельности, поэтому както так")[m
+[32m+[m[32m    else:[m
+[32m+[m[32m        self.all_db["accounts"][str(user_1.id)]["married_request"] = user_2.id[m
+[32m+[m[32m        if self.all_db["accounts"][str(user_2.id)]["married_request"] == user_1.id:[m
+[32m+[m[32m            self.all_db["accounts"][str(user_1.id)]["married"] = True[m
+[32m+[m[32m            self.all_db["accounts"][str(user_2.id)]["married"] = True[m
+[32m+[m[32m            self.all_db["accounts"][str(user_1.id)]["married_to"] = user_2.id[m
+[32m+[m[32m            self.all_db["accounts"][str(user_2.id)]["married_to"] = user_1.id[m
+[32m+[m[32m            date = datetime.datetime().today().strftime("%d.%m.%d %H:%M:%S")[m
+[32m+[m[32m            self.all_db["accounts"][str(user_1.id)]["married_date"] = date[m
+[32m+[m[32m            self.all_db["accounts"][str(user_2.id)]["married_date"] = date[m
+[32m+[m[32m            self.all_db["accounts"][str(user_1.id)]["married_request"] = 0[m
+[32m+[m[32m            self.all_db["accounts"][str(user_2.id)]["married_request"] = 0[m
+[32m+[m[32m            await message.channel.send("Поздравляю, теперь {} и {} женаты".format(user_1.mention, user_2.mention))[m
+[32m+[m[32m        else:[m
+[32m+[m[32m            await message.channel.send("Вы подали заявку, ждем когда {} ответит".format(user_2.mention))[m
+[32m+[m[32m        #{"married": False, "married_to": 0, "xp": 0, "married_date": "", "married_request": 0, "admin": False, "enable_msg_reply": True}})[m
+\ No newline at end of file[m
+[1mdiff --git a/conf.py b/conf.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..0ac0140[m
+[1m--- /dev/null[m
+[1m+++ b/conf.py[m
+[36m@@ -0,0 +1,4 @@[m
+[32m+[m[32mcell_char = "!"[m
+[32m+[m[32mbot_word = ""[m
+[32m+[m[32mcommands = ["help", "list", "set", "enable", "profile", "delete"][m
+[32m+[m[32mbot_token = "ODQzODcyNzE4MTU4ODIzNDU1.YKKLtg.EceF6RqaCdYuTwpViMeVG42f3_U"[m
+\ No newline at end of file[m
+[1mdiff --git a/db.pickle b/db.pickle[m
+[1mnew file mode 100644[m
+[1mindex 0000000..95741e6[m
+Binary files /dev/null and b/db.pickle differ
+[1mdiff --git a/functions/com.py b/functions/com.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..4a83d37[m
+[1m--- /dev/null[m
+[1m+++ b/functions/com.py[m
+[36m@@ -0,0 +1,11 @@[m
+[32m+[m[32mimport functions.ds_delete as ds_delete[m
+[32m+[m[32mimport functions.ds_enable as ds_enable[m
+[32m+[m[32mimport functions.ds_he
