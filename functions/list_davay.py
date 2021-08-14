@@ -1,9 +1,6 @@
 import re, conf, datetime, check
-async def davay(*args):
-    self = args[0]
-    message = args[1]
+async def davay(self, message, i):
     msg = str(message.content)[len(list(conf.bot_word)):]
-    i = args[2]
     user_1 = message.author
     id = re.findall("<@!\d{18}>", msg)[0]
     id = re.findall("<@!(.*?)>", id)[0]
